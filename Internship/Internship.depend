@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1573863209 source:e:\no_touching\cs(basic)\codes\practice\internship\minheap.cpp
+	<iostream>
+	<climits>
+
+1573945872 source:e:\no_touching\cs(basic)\codes\practice\internship\rbt.cpp
+	<iostream>
+

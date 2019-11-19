@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1574034011 source:e:\no_touching\cs(basic)\codes\practice\minheap\minheap.cpp
+	<iostream>
+	<climits>
+

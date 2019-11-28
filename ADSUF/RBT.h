@@ -9,39 +9,32 @@
 #define RBT_H_
 
 #include<iostream>
-#include"Building.h"
+#include"Node.h"
 using namespace std;
 
-struct node
-{
-       building key;
-       node *parent;
-       char color;
-       node *left;
-       node *right;
-};
-
 class RBT
-{
-      node *root;
-      node *q;
-   public :
-      RBT()
-      {
-              q=NULL;
-              root=NULL;
-      }
-      node* insertNode(building z);
-      void insertfix(node *);
-      void leftrotate(node *);
-      void rightrotate(node *);
-      void del(building x);
-      node* successor(node *);
-      void delfix(node *);
-      void disp();
-      void display( node *);
-      void searchNode(building x);
-      bool checkEmpty();
+ {
+	Node *root;
+	int nodeCount;
+	void leftRotate(Node *x);
+	void rightRotate(Node *x);
+	void swapColors(Node *x1, Node *x2);
+	void swapValues(Node *u, Node *v);
+	void fixRedRed(Node *x);
+	Node* successor(Node *x);
+	Node* BSTreplace(Node *x);
+	void fixDoubleBlack(Node *x);
+	void levelOrder(Node *x);
+public:
+	RBT();
+	Node* getRoot();
+	Node* search(int n);
+	Node* insert(Building n);
+	void deleteNode(Node *v);
+	void deleteByVal(Building n);
+	void printLevelOrder();
+	bool checkEmpty();
+	bool pSuccessor(Node* x);
 };
 
 #endif /* RBT_H_ */

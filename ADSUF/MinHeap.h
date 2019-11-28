@@ -8,7 +8,7 @@
 #include"RBT.h"
 
 struct buildingHeap{
-	node* rb;
+	Node* rb;
 };
 
 class MinHeap

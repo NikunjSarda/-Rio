@@ -12,7 +12,7 @@
 using namespace std;
 
 struct buildingHeap{
-	node* rb;
+	Node* rb;
 };
 
 bool compareitem(buildingHeap a, buildingHeap b);
@@ -96,7 +96,7 @@ void MinHeap::insertKey(buildingHeap k)
 // new_val is smaller than harr[i].
 void MinHeap::decreaseKey(int i, int new_val)
 {
-    harr[i].rb->key.extime = new_val;
+    harr[i].rb->key.executeTime = new_val;
     while (i != 0 && compareitem(harr[parent(i)],harr[i]))
     {
        swap(i, parent(i));
@@ -106,13 +106,13 @@ void MinHeap::decreaseKey(int i, int new_val)
 
 void MinHeap::increaseKey(int i, int new_val)
 {
-//    if(harr[i].rb->key.extime == harr[i].rb->key.totaltime){
+//    if(harr[i].rb->key.executeTime == harr[i].rb->key.totaltime){
 //    	deleteKey(i);
 //    	increaseKey(0,1);
 //    	rb.del(harr[i]);
 //    }
 //    else {
-		harr[i].rb->key.extime = harr[i].rb->key.extime + new_val;
+		harr[i].rb->key.executeTime = harr[i].rb->key.executeTime + new_val;
 		int smallest = i;
 		while (left(i) < heap_size) {
 			if (left(i) <= heap_size && compareitem(harr[i], harr[left(i)])) {
@@ -136,13 +136,14 @@ void MinHeap::increaseKey(int i, int new_val)
 buildingHeap MinHeap::extractMin()
 {
     if (heap_size <= 0) {
-        buildingHeap b;
-        node* rb = new node;
-        rb->key.extime = INT_MAX;
-        rb->key.id = INT_MAX;
+        buildingHeap bh;
+        Building b;
+        Node* rb = new Node(b);
+        rb->key.executeTime = INT_MAX;
+        rb->key.buildingId = INT_MAX;
         rb->key.totalTime = INT_MAX;
-        b.rb = rb;
-        return b;
+        bh.rb = rb;
+        return bh;
     }
     if (heap_size == 1)
     {
@@ -195,7 +196,7 @@ void MinHeap::printHeap()
     cout << "Array representation of Heap is:\n";
 
     for (int i = 0; i < heap_size; ++i)
-        cout<<harr[i].rb->key.id << " "<<harr[i].rb->key.extime<<" "<<harr[i].rb->key.totalTime;
+        cout<<harr[i].rb->key.buildingId <<" "<<harr[i].rb->key.executeTime<<" "<<harr[i].rb->key.totalTime<<",";
     cout << "\n";
 }
 
@@ -218,14 +219,14 @@ bool MinHeap::checkHeap() {
 
 bool compareitem(buildingHeap a, buildingHeap b) {
 
-    if(a.rb->key.extime > b.rb->key.extime) {
+    if(a.rb->key.executeTime > b.rb->key.executeTime) {
         return true;
     }
-    else if(a.rb->key.extime < b.rb->key.extime) {
+    else if(a.rb->key.executeTime < b.rb->key.executeTime) {
     	return false;
     }
     else {
-		if (a.rb->key.id > b.rb->key.id) {
+		if (a.rb->key.buildingId > b.rb->key.buildingId) {
 			return true;
 		} else {
 			return false;

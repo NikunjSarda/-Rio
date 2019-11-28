@@ -4,470 +4,436 @@
  *  Created on: Nov 20, 2019
  *      Author: rio
  */
-#include<iostream>
-
+#include <iostream>
+#include <queue>
+#include"Node.h"
 using namespace std;
 
-struct building {
-    int id;
-    int extime;
-    int totalTime;
-};
-
-struct node
-{
-       building key;
-       node *parent;
-       char color;
-       node *left;
-       node *right;
-};
-
 class RBT
-{
-      node *root;
-      node *q;
-      int nodeCount = 0;
-   public :
-      RBT()
-      {
-              q=NULL;
-              root=NULL;
-      }
-      node* insertNode(building z);
-      void insertfix(node *);
-      void leftrotate(node *);
-      void rightrotate(node *);
-      void del(building x);
-      node* successor(node *);
-      void delfix(node *);
-      void disp();
-      void display( node *);
-      void searchNode(building x);
-      bool checkEmpty();
+ {
+	Node *root;
+	int nodeCount = 0;
+	void leftRotate(Node *x);
+	void rightRotate(Node *x);
+	void swapColors(Node *x1, Node *x2);
+	void swapValues(Node *u, Node *v);
+	void fixRedRed(Node *x);
+	Node* successor(Node *x);
+	Node* BSTreplace(Node *x);
+	void fixDoubleBlack(Node *x);
+	void levelOrder(Node *x);
+public:
+	RBT();
+	Node* getRoot();
+	Node* search(int n);
+	Node* insert(Building n);
+	void deleteNode(Node *v);
+	void deleteByVal(Building n);
+	void printLevelOrder();
+	bool checkEmpty();
+	bool pSuccessor(Node* x);
 };
-node* RBT::insertNode(building z)
-{
-     node *p,*q;
-     node *t=new node;
-     t->key=z;
-     t->left=NULL;
-     t->right=NULL;
-     t->parent=NULL;
-     t->color='r';
-     p=root;
-     q=NULL;
-     if(root==NULL)
-     {
-           root=t;
-           t->parent=NULL;
-     }
-     else
-     {
-         while(p!=NULL)
-         {
-              q=p;
-              if(p->key.id<t->key.id)
-                  p=p->right;
-              else
-                  p=p->left;
-         }
-         t->parent=q;
-         if(q->key.id<t->key.id)
-              q->right=t;
-         else
-              q->left=t;
-     }
-     insertfix(t);
-     nodeCount++;
-     return t;
-}
-void RBT::insertfix(node *t)
-{
-     node *u;
-     if(root==t)
-     {
-         t->color='b';
-         return;
-     }
-     while(t->parent!=NULL&&t->parent->color=='r')
-     {
-           node *g=t->parent->parent;
-           if(g->left==t->parent)
-           {
-                        if(g->right!=NULL)
-                        {
-                              u=g->right;
-                              if(u->color=='r')
-                              {
-                                   t->parent->color='b';
-                                   u->color='b';
-                                   g->color='r';
-                                   t=g;
-                              }
-                        }
-                        else
-                        {
-                            if(t->parent->right==t)
-                            {
-                                 t=t->parent;
-                                 leftrotate(t);
-                            }
-                            t->parent->color='b';
-                            g->color='r';
-                            rightrotate(g);
-                        }
-           }
-           else
-           {
-                        if(g->left!=NULL)
-                        {
-                             u=g->left;
-                             if(u->color=='r')
-                             {
-                                  t->parent->color='b';
-                                  u->color='b';
-                                  g->color='r';
-                                  t=g;
-                             }
-                        }
-                        else
-                        {
-                            if(t->parent->left==t)
-                            {
-                                   t=t->parent;
-                                   rightrotate(t);
-                            }
-                            t->parent->color='b';
-                            g->color='r';
-                            leftrotate(g);
-                        }
-           }
-           root->color='b';
-     }
-}
 
-void RBT::del(building x)
-{
-     if(root==NULL)
-     {
-           cout<<"\nEmpty Tree." ;
-           return ;
-     }
-     node *p;
-     p=root;
-     node *y=NULL;
-     node *q=NULL;
-     int found=0;
-     while(p!=NULL&&found==0)
-     {
-           if(p->key.id==x.id)
-               found=1;
-           if(found==0)
-           {
-                 if(p->key.id<x.id)
-                    p=p->right;
-                 else
-                    p=p->left;
-           }
-     }
-     if(found==0)
-     {
-            cout<<"\nElement Not Found.";
-            return ;
-     }
-     else
-     {
-         if(p->left==NULL||p->right==NULL)
-              y=p;
-         else
-              y=successor(p);
-         if(y->left!=NULL)
-              q=y->left;
-         else
-         {
-              if(y->right!=NULL)
-                   q=y->right;
-              else
-                   q=NULL;
-         }
-         if(q!=NULL)
-              q->parent=y->parent;
-         if(y->parent==NULL)
-              root=q;
-         else
-         {
-             if(y==y->parent->left)
-                y->parent->left=q;
-             else
-                y->parent->right=q;
-         }
-         if(y!=p)
-         {
-             p->color=y->color;
-             p->key=y->key;
-         }
-         if(y->color=='b')
-             delfix(q);
-     }
-     nodeCount--;
-}
+  // left rotates the given node
+  void RBT::leftRotate(Node *x) {
+    // new parent will be node's right child
+    Node *nParent = x->right;
 
-void RBT::delfix(node *p)
-{
-    node *s;
-    while(p!=root&&p->color=='b')
-    {
-          if(p->parent->left==p)
-          {
-                  s=p->parent->right;
-                  if(s->color=='r')
-                  {
-                         s->color='b';
-                         p->parent->color='r';
-                         leftrotate(p->parent);
-                         s=p->parent->right;
-                  }
-                  if(s->right->color=='b'&&s->left->color=='b')
-                  {
-                         s->color='r';
-                         p=p->parent;
-                  }
-                  else
-                  {
-                      if(s->right->color=='b')
-                      {
-                             s->left->color='b';
-                             s->color='r';
-                             rightrotate(s);
-                             s=p->parent->right;
-                      }
-                      s->color=p->parent->color;
-                      p->parent->color='b';
-                      s->right->color='b';
-                      leftrotate(p->parent);
-                      p=root;
-                  }
-          }
-          else
-          {
-                  s=p->parent->left;
-                  if(s->color=='r')
-                  {
-                        s->color='b';
-                        p->parent->color='r';
-                        rightrotate(p->parent);
-                        s=p->parent->left;
-                  }
-                  if(s->left->color=='b'&&s->right->color=='b')
-                  {
-                        s->color='r';
-                        p=p->parent;
-                  }
-                  else
-                  {
-                        if(s->left->color=='b')
-                        {
-                              s->right->color='b';
-                              s->color='r';
-                              leftrotate(s);
-                              s=p->parent->left;
-                        }
-                        s->color=p->parent->color;
-                        p->parent->color='b';
-                        s->left->color='b';
-                        rightrotate(p->parent);
-                        p=root;
-                  }
-          }
-       p->color='b';
-       root->color='b';
+    // update root if current node is root
+    if (x == root)
+      root = nParent;
+
+    x->moveDown(nParent);
+
+    // connect x with new parent's left element
+    x->right = nParent->left;
+    // connect new parent's left element with node
+    // if it is not null
+    if (nParent->left != NULL)
+      nParent->left->parent = x;
+
+    // connect new parent with x
+    nParent->left = x;
+  }
+
+  void RBT::rightRotate(Node *x) {
+    // new parent will be node's left child
+    Node *nParent = x->left;
+
+    // update root if current node is root
+    if (x == root)
+      root = nParent;
+
+    x->moveDown(nParent);
+
+    // connect x with new parent's right element
+    x->left = nParent->right;
+    // connect new parent's right element with node
+    // if it is not null
+    if (nParent->right != NULL)
+      nParent->right->parent = x;
+
+    // connect new parent with x
+    nParent->right = x;
+  }
+
+  void RBT::swapColors(Node *x1, Node *x2) {
+    COLOR temp;
+    temp = x1->color;
+    x1->color = x2->color;
+    x2->color = temp;
+  }
+
+  void RBT::swapValues(Node *u, Node *v) {
+    Building temp;
+    temp = u->key;
+    u->key = v->key;
+    v->key = temp;
+  }
+
+  // fix red red at given node
+  void RBT::fixRedRed(Node *x) {
+    // if x is root color it black and return
+    if (x == root) {
+      x->color = BLACK;
+      return;
     }
-}
 
-void RBT::leftrotate(node *p)
-{
-     if(p->right==NULL)
-           return ;
-     else
-     {
-           node *y=p->right;
-           if(y->left!=NULL)
-           {
-                  p->right=y->left;
-                  y->left->parent=p;
-           }
-           else
-                  p->right=NULL;
-           if(p->parent!=NULL)
-                y->parent=p->parent;
-           if(p->parent==NULL)
-                root=y;
-           else
-           {
-               if(p==p->parent->left)
-                       p->parent->left=y;
-               else
-                       p->parent->right=y;
-           }
-           y->left=p;
-           p->parent=y;
-     }
-}
-void RBT::rightrotate(node *p)
-{
-     if(p->left==NULL)
-          return ;
-     else
-     {
-         node *y=p->left;
-         if(y->right!=NULL)
-         {
-                  p->left=y->right;
-                  y->right->parent=p;
-         }
-         else
-                 p->left=NULL;
-         if(p->parent!=NULL)
-                 y->parent=p->parent;
-         if(p->parent==NULL)
-               root=y;
-         else
-         {
-             if(p==p->parent->left)
-                   p->parent->left=y;
-             else
-                   p->parent->right=y;
-         }
-         y->right=p;
-         p->parent=y;
-     }
-}
+    // initialize parent, grandparent, uncle
+    Node *parent = x->parent, *grandparent = parent->parent,
+         *uncle = x->uncle();
 
-node* RBT::successor(node *p)
-{
-      node *y=NULL;
-     if(p == NULL) {
-    	 return y;
-     }
-     if(p->left!=NULL)
-     {
-         y=p->left;
-         while(y->right!=NULL)
-              y=y->right;
-     }
-     else
-     {
-         y=p->right;
-         while(y->left!=NULL)
-              y=y->left;
-     }
-     return y;
-}
+    if (parent->color != BLACK) {
+      if (uncle != NULL && uncle->color == RED) {
+        // uncle red, perform re-coloring and recurse
+        parent->color = BLACK;
+        uncle->color = BLACK;
+        grandparent->color = RED;
+        fixRedRed(grandparent);
+      } else {
+        // Else perform LR, LL, RL, RR
+        if (parent->isOnLeft()) {
+          if (x->isOnLeft()) {
+            // for left right
+            swapColors(parent, grandparent);
+          } else {
+            leftRotate(parent);
+            swapColors(x, grandparent);
+          }
+          // for left left and left right
+          rightRotate(grandparent);
+        } else {
+          if (x->isOnLeft()) {
+            // for right left
+            rightRotate(parent);
+            swapColors(x, grandparent);
+          } else {
+            swapColors(parent, grandparent);
+          }
 
-void RBT::disp()
-{
-     display(root);
-}
-void RBT::display(node *p)
-{
-     if(root==NULL)
-     {
-          cout<<"\nEmpty Tree.";
-          return ;
-     }
-     if(p!=NULL)
-     {
-                cout<<"\n\t NODE: ";
-                cout<<"\n Key: "<<p->key.id<<" "<<p->key.extime<<" "<<p->key.totalTime;
-                cout<<"\n Colour: ";
-    if(p->color=='b')
-     cout<<"Black";
+          // for right right and right left
+          leftRotate(grandparent);
+        }
+      }
+    }
+  }
+
+  // find node that do not have a left child
+  // in the subtree of the given node
+  Node *RBT::successor(Node *x) {
+    Node *temp = x;
+
+    while (temp->left != NULL)
+      temp = temp->left;
+
+    return temp;
+  }
+
+  // find node that replaces a deleted node in BST
+  Node *RBT::BSTreplace(Node *x) {
+    // when node have 2 children
+    if (x->left != NULL and x->right != NULL)
+      return successor(x->right);
+
+    // when leaf
+    if (x->left == NULL and x->right == NULL)
+      return NULL;
+
+    // when single child
+    if (x->left != NULL)
+      return x->left;
     else
-     cout<<"Red";
-                if(p->parent!=NULL)
-                       cout<<"\n Parent: "<<p->parent->key.id;
-                else
-                       cout<<"\n There is no parent of the node.  ";
-                if(p->right!=NULL)
-                       cout<<"\n Right Child: "<<p->right->key.id;
-                else
-                       cout<<"\n There is no right child of the node.  ";
-                if(p->left!=NULL)
-                       cout<<"\n Left Child: "<<p->left->key.id;
-                else
-                       cout<<"\n There is no left child of the node.  ";
-                cout<<endl;
-    if(p->left)
-    {
-                 cout<<"\n\nLeft:\n";
-     display(p->left);
+      return x->right;
+  }
+
+  // deletes the given node
+  void RBT::deleteNode(Node *v) {
+	  nodeCount--;
+    Node *u = BSTreplace(v);
+
+    // True when u and v are both black
+    bool uvBlack = ((u == NULL or u->color == BLACK) and (v->color == BLACK));
+    Node *parent = v->parent;
+
+    if (u == NULL) {
+      // u is NULL therefore v is leaf
+      if (v == root) {
+        // v is root, making root null
+        root = NULL;
+      } else {
+        if (uvBlack) {
+          // u and v both black
+          // v is leaf, fix double black at v
+          fixDoubleBlack(v);
+        } else {
+          // u or v is red
+          if (v->sibling() != NULL)
+            // sibling is not null, make it red"
+            v->sibling()->color = RED;
+        }
+
+        // delete v from the tree
+        if (v->isOnLeft()) {
+          parent->left = NULL;
+        } else {
+          parent->right = NULL;
+        }
+      }
+      delete v;
+      return;
     }
-    if(p->right)
-    {
-     cout<<"\n\nRight:\n";
-                 display(p->right);
+
+    if (v->left == NULL or v->right == NULL) {
+      // v has 1 child
+      if (v == root) {
+        // v is root, assign the value of u to v, and delete u
+        v->key = u->key;
+        v->left = v->right = NULL;
+        delete u;
+      } else {
+        // Detach v from tree and move u up
+        if (v->isOnLeft()) {
+          parent->left = u;
+        } else {
+          parent->right = u;
+        }
+        delete v;
+        u->parent = parent;
+        if (uvBlack) {
+          // u and v both black, fix double black at u
+          fixDoubleBlack(u);
+        } else {
+          // u or v red, color u black
+          u->color = BLACK;
+        }
+      }
+      return;
     }
-     }
-}
-void RBT::searchNode(building x)
-{
-     if(root==NULL)
-     {
-           cout<<"\nEmpty Tree\n" ;
-           return  ;
-     }
-     node *p=root;
-     int found=0;
-     while(p!=NULL&& found==0)
-     {
-            if(p->key.id==x.id)
-                found=1;
-            if(found==0)
-            {
-                 if(p->key.id<x.id)
-                      p=p->right;
-                 else
-                      p=p->left;
+
+    // v has 2 children, swap values with successor and recurse
+    swapValues(u, v);
+    deleteNode(u);
+  }
+
+  void RBT::fixDoubleBlack(Node *x) {
+    if (x == root)
+      // Reached root
+      return;
+
+    Node *sibling = x->sibling(), *parent = x->parent;
+    if (sibling == NULL) {
+      // No sibiling, double black pushed up
+      fixDoubleBlack(parent);
+    } else {
+      if (sibling->color == RED) {
+        // Sibling red
+        parent->color = RED;
+        sibling->color = BLACK;
+        if (sibling->isOnLeft()) {
+          // left case
+          rightRotate(parent);
+        } else {
+          // right case
+          leftRotate(parent);
+        }
+        fixDoubleBlack(x);
+      } else {
+        // Sibling black
+        if (sibling->hasRedChild()) {
+          // at least 1 red children
+          if (sibling->left != NULL and sibling->left->color == RED) {
+            if (sibling->isOnLeft()) {
+              // left left
+              sibling->left->color = sibling->color;
+              sibling->color = parent->color;
+              rightRotate(parent);
+            } else {
+              // right left
+              sibling->left->color = parent->color;
+              rightRotate(sibling);
+              leftRotate(parent);
             }
-     }
-     if(found==0)
-          cout<<"\nElement Not Found.";
-     else
-     {
-                cout<<"\n\t FOUND NODE: ";
-                cout<<"\n Key: "<<p->key.id;
-                cout<<"\n Colour: ";
-    if(p->color=='b')
-     cout<<"Black";
+          } else {
+            if (sibling->isOnLeft()) {
+              // left right
+              sibling->right->color = parent->color;
+              leftRotate(sibling);
+              rightRotate(parent);
+            } else {
+              // right right
+              sibling->right->color = sibling->color;
+              sibling->color = parent->color;
+              leftRotate(parent);
+            }
+          }
+          parent->color = BLACK;
+        } else {
+          // 2 black children
+          sibling->color = RED;
+          if (parent->color == BLACK)
+            fixDoubleBlack(parent);
+          else
+            parent->color = BLACK;
+        }
+      }
+    }
+  }
+
+  // prints level order for given node
+  void RBT::levelOrder(Node *x) {
+    if (x == NULL)
+      // return if node is null
+      return;
+
+    // queue for level order
+    queue<Node *> q;
+    Node *curr;
+
+    // push x
+    q.push(x); // @suppress("Invalid arguments")
+
+    while (!q.empty()) {
+      // while q is not empty
+      // dequeue
+      curr = q.front();
+      q.pop();
+
+      // print node value
+      cout << curr->key.buildingId << " ";
+
+      // push children to queue
+      if (curr->left != NULL)
+        q.push(curr->left); // @suppress("Invalid arguments")
+      if (curr->right != NULL)
+        q.push(curr->right); // @suppress("Invalid arguments")
+    }
+  }
+
+  // constructor
+  // initialize root
+  RBT::RBT() { root = NULL; }
+
+  Node *RBT::getRoot() { return root; }
+
+  // searches for given value
+  // if found returns the node (used for delete)
+  // else returns the last node while traversing (used in insert)
+  Node *RBT::search(int n) {
+    Node *temp = root;
+    while (temp != NULL) {
+      if (n < temp->key.buildingId) {
+        if (temp->left == NULL)
+          break;
+        else
+          temp = temp->left;
+      } else if (n == temp->key.buildingId) {
+        break;
+      } else {
+        if (temp->right == NULL)
+          break;
+        else
+          temp = temp->right;
+      }
+    }
+
+    return temp;
+  }
+
+  // inserts the given value to tree
+  Node *RBT::insert(Building n) {
+	  nodeCount++;
+    Node *newNode = new Node(n);
+    if (root == NULL) {
+      // when root is null
+      // simply insert value at root
+      newNode->color = BLACK;
+      root = newNode;
+    } else {
+      Node *temp = search(n.buildingId);
+
+      if (temp->key.buildingId == n.buildingId) {
+        // return if value already exists
+    	  cout<<"Building already there"<<endl;
+        return NULL;
+      }
+
+      // if value is not found, search returns the node
+      // where the value is to be inserted
+
+      // connect new node to correct node
+      newNode->parent = temp;
+
+      if (n.buildingId < temp->key.buildingId)
+        temp->left = newNode;
+      else
+        temp->right = newNode;
+
+      // fix red red voilaton if exists
+      fixRedRed(newNode);
+    }
+    return newNode;
+  }
+
+  // utility function that deletes the node with given value
+  void RBT::deleteByVal(Building n) {
+    if (root == NULL)
+      // Tree is empty
+      return;
+
+    Node *v = search(n.buildingId);
+
+    if (v->key.buildingId != n.buildingId) {
+      cout << "No node found to delete with value:" << n.buildingId << endl;
+      return;
+    }
+
+    deleteNode(v);
+  }
+
+  // prints level order of the tree
+  void RBT::printLevelOrder() {
+    cout << "Level order: " << endl;
+    if (root == NULL)
+      cout << "Tree is empty" << endl;
     else
-     cout<<"Red";
-                if(p->parent!=NULL)
-                       cout<<"\n Parent: "<<p->parent->key.id;
-                else
-                       cout<<"\n There is no parent of the node.  ";
-                if(p->right!=NULL)
-                       cout<<"\n Right Child: "<<p->right->key.id;
-                else
-                       cout<<"\n There is no right child of the node.  ";
-                if(p->left!=NULL)
-                       cout<<"\n Left Child: "<<p->left->key.id;
-                else
-                       cout<<"\n There is no left child of the node.  ";
-                cout<<endl;
+      levelOrder(root);
+    cout << endl;
+  }
 
-     }
-}
+  bool RBT::checkEmpty(){
+	  if(getRoot() == NULL) {
+		  return false;
+	  }
+	  return true;
+  }
 
-bool RBT::checkEmpty() {
-//	node * p = successor(root);
-	if(nodeCount == 0){
-		return false;
-	}
-	else {
-		return true;
-	}
-}
+  bool RBT::pSuccessor(Node* x) {
+	  if (x->left != NULL && x->right != NULL) {
+		  return true;
+	  }
+	  return false;
+  }
+
 
 
 
